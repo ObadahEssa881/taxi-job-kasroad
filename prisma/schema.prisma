@@ -5,11 +5,45 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum isBanned {
+  Yes
+  No
+}
+enum Role {
+  client
+  driver
+  partner
+}
+
+enum Status {
+  completed
+  cancelled_by_driver
+  cancelled_by_client
+}
+
+model User {
+  users_id Int @id @default(autoincrement())
+  banned isBanned
+  role Role
+  clientTrips Trip[] @relation("client")
+  driverTrips Trip[] @relation("driver")
+}
+
+model Trip {
+  id Int @id @default(autoincrement())
+  client_id Int 
+  driver_id Int 
+  city_id Int 
+  user User @relation("client" ,fields: [client_id], references: [users_id])
+  driver User @relation( "driver",fields: [driver_id], references: [users_id])
+  status Status
+  request_at String
 }
